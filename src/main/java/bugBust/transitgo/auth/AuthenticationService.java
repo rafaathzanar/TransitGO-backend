@@ -36,6 +36,10 @@ public class AuthenticationService {
             throw new EmailAlreadyExistException("Email already in use");
         }
 
+        if (repository.existsByBusid(request.getBusid())){
+            throw new EmailAlreadyExistException("Bus already assigned");
+        }
+
         // Get the user's role from the request
             String userRole = request.getType();
             Role role = null;
@@ -59,14 +63,15 @@ public class AuthenticationService {
                 .build();
         repository.save(user);
 
-        //generate verification token and send email
-        String token = UUID.randomUUID().toString();
-        user.setVerificationToken(token);
-        repository.save(user);
+        if (role == Role.passenger){
+            //generate verification token and send email
+            String token = UUID.randomUUID().toString();
+            user.setVerificationToken(token);
+            repository.save(user);
 
-        String confirmationURL = "http://localhost:3000/verify-email?token="+token;
-        emailService.sendEmail(user.getEmail(),"Email Verification", "Click the link to verify your email :"+confirmationURL);
-
+            String confirmationURL = "http://localhost:3000/verify-email?token="+token;
+            emailService.sendEmail(user.getEmail(),"Email Verification", "Click the link to verify your email :"+confirmationURL);
+        }
 
         var jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder()

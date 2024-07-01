@@ -24,6 +24,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByBusid(String busId);
 
 
+    boolean existsByBusid(String busId);
+
     @Query( "SELECT u FROM User u")
    List<User> findAll();
 }
